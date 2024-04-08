@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using authentication_service.Business;
 using System.Text;
+using authentication_service.DAL;
+using Npgsql;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,38 +13,29 @@ namespace authentication_service.Controllers
 	[ApiController]
 	public class AuthController : ControllerBase
 	{
+
 		private readonly IConfiguration _configuration;
 		private readonly string ConnectionString;
+		private readonly Encryptor encryptor;
 
 		public AuthController(IConfiguration configuration)
 		{
 			_configuration = configuration;
 			ConnectionString = _configuration.GetSection("ConnectionStrings").GetValue<string>("DevDatabase");
+			var con = new Connection(ConnectionString);
+			var _register = new Register(con);
+			encryptor = new Encryptor(_register);
 		}
-		// GET: api/<AuthController>
-
-		// GET api/<AuthController>/5
 		[HttpGet("/P/{password}")]
 		public string Get(string empty, string password)
 		{
-			Encryptor encryptor = new Encryptor();
-			//return encryptor.Hasher(password);
 			return "n/a";
 		}
 
-		[HttpGet("{salt}")]
-		public string Get(string salt)
+		[HttpPost("{email}/{password}")]
+		public void Post(string email, string password)
 		{
-			Encryptor encryptor = new Encryptor();
-			//return encryptor.Hasher(Encoding.ASCII.GetBytes(salt), "SAMPLE");
-			return ConnectionString;
-		}
-
-		[HttpGet()]
-		public byte[] Get()
-		{
-			Encryptor encryptor = new Encryptor();
-			return encryptor.salt();
+			encryptor.SaveInfo(email, password);
 		}
 
 		// POST api/<AuthController>
