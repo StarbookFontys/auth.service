@@ -35,9 +35,9 @@ namespace authentication_service.Business
 
 			Models.HashInfo hashInfo = new Models.HashInfo
 			{ 
-			email = email,
-			hashed = hashed,
-			salt = _salt
+				email = email,
+				hashed = hashed,
+				salt = _salt
 			};
 
 			return hashInfo;

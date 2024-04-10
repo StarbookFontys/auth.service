@@ -38,7 +38,7 @@ namespace authentication_service.DAL
 			
 		}
 
-		public void SaveInfo(string email, string hashed, byte[] salt)
+		public void SaveInfo(string email, string hashed, string salt)
 		{
 			try
 			{
