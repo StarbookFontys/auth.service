@@ -4,6 +4,7 @@ using authentication_service.Business;
 using System.Text;
 using authentication_service.DAL;
 using Npgsql;
+using authentication_service.Exceptions;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -26,16 +27,24 @@ namespace authentication_service.Controllers
 			var _register = new Register(con);
 			encryptor = new Encryptor(_register);
 		}
-		[HttpGet("/P/{password}")]
-		public string Get(string empty, string password)
+		[HttpGet("{email}/{password}")]
+		public Boolean Get(string email, string password)
 		{
-			return "n/a";
+			return encryptor.VerifyInformation(email, password);
 		}
 
 		[HttpPost("{email}/{password}")]
-		public void Post(string email, string password)
+		public IResult Post(string email, string password)
 		{
-			encryptor.SaveInfo(email, password);
+			try
+			{
+				encryptor.SaveInfo(email, password);
+				return Results.Ok();
+			}
+			catch(EmailAlreadyExistsEx ex)
+			{
+				return Results.Problem(ex.Message);
+			}
 		}
 
 		// POST api/<AuthController>

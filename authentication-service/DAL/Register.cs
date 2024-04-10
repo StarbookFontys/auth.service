@@ -2,6 +2,7 @@
 using authentication_service.DAL;
 using authentication_service.Interfaces;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace authentication_service.DAL
 {
@@ -39,7 +40,6 @@ namespace authentication_service.DAL
 
 		public void SaveInfo(string email, string hashed, byte[] salt)
 		{
-			string EmailError = "Email already exists in the system.";
 			try
 			{
 				con.Open();
@@ -56,19 +56,35 @@ namespace authentication_service.DAL
 			{
 				Console.WriteLine("encountered an exception from database. Please check the connection and try again" + ex);
 			}
-			catch (Exception ex)
-			{
-				if(ex.Message == EmailError)
-				{
-					Console.WriteLine("Email already exists in the system");
-				}
-				Console.WriteLine("Encountered unhandled exception " + ex.Message);
-			}
 		}
 
-		public string GetHash(string email)
+		public (string salt, string hash) GetHashInformation(string email)
 		{
-			return "hi";
+			string salt = "null";
+			string hash = "null"; 
+			try
+			{
+				con.Open();
+
+				string insertQuery = "SELECT salt, hash FROM hash_storage WHERE email = @Email";
+
+				using var GetHashCmd = new NpgsqlCommand(insertQuery, con.GetConnectionString());
+				GetHashCmd.Parameters.AddWithValue("@Email", email);
+				using (NpgsqlDataReader reader = GetHashCmd.ExecuteReader())
+				{
+					if (reader.Read())
+					{
+						salt = reader.GetString(0);
+						hash = reader.GetString(1);
+					}
+				}
+				con.Close();
+				return (salt, hash);
+			}
+			catch(NpgsqlException ex)
+			{
+				return (salt, hash); 
+			}
 		}
 	}
 }

@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using System.Security.Cryptography;
 using authentication_service.Interfaces;
 using System.Collections.Generic;
+using authentication_service.Exceptions;
+using System.Text;
 
 namespace authentication_service.Business
 {
@@ -22,9 +24,8 @@ namespace authentication_service.Business
 			return salt;
 		}
 
-		private Models.HashInfo Hasher(string email, string password)
+		private Models.HashInfo Hasher(string email, string password, byte[] _salt)
 		{
-			 byte []_salt = GenerateSalt();
 			string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
 				password: password,
 				salt: _salt,
@@ -47,12 +48,27 @@ namespace authentication_service.Business
 			var NoEmailExists = register.NoEmailExists(email);
 			if (NoEmailExists == true)
 			{
-				throw new Exception();
+				throw new EmailAlreadyExistsEx(email);
 			}
 			else
 			{
-				Models.HashInfo hashinfo = Hasher(email, password);
-				register.SaveInfo(hashinfo.email, hashinfo.hashed, hashinfo.salt);
+				Models.HashInfo hashinfo = Hasher(email, password, GenerateSalt());
+				register.SaveInfo(hashinfo.email, hashinfo.hashed, Convert.ToBase64String(hashinfo.salt));
+			}
+		}
+
+		public Boolean VerifyInformation(string email, string password)
+		{
+			byte[] salt = Convert.FromBase64String(register.GetHashInformation(email).salt);
+			string StoredHash = register.GetHashInformation(email).hash;
+			Models.HashInfo ReceivedHash = Hasher(email, password, salt);
+			if(StoredHash == ReceivedHash.hashed)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
 			}
 		}
 	}
