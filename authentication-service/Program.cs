@@ -1,3 +1,5 @@
+using AspNetCoreRateLimit;
+
 var builder = WebApplication.CreateBuilder(args);
 
 var provider = builder.Services.BuildServiceProvider();
@@ -10,6 +12,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddRateLimiter(options => "max_requests": 100) ;
 
 var app = builder.Build();
 

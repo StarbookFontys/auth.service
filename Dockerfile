@@ -6,13 +6,6 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-#Create dir for SSL
-RUN mkdir -p /etc/ssl/certs/
-
-# Copy SSL certificates to the container
-COPY cert.pem /etc/ssl/certs/
-COPY key.pem /etc/ssl/certs/
-
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
