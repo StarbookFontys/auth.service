@@ -1,4 +1,6 @@
 using AspNetCoreRateLimit;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,9 +15,27 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddRateLimiter(options => "max_requests": 100) ;
+builder.Services.AddRateLimiter(options =>
+{
+	options.RejectionStatusCode = 429;
+	options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+		RateLimitPartition.GetFixedWindowLimiter(
+			partitionKey: httpContext.User.Identity?.Name ?? httpContext.Request.Headers.Host.ToString(),
+			factory: partition => new FixedWindowRateLimiterOptions
+			{
+				AutoReplenishment = true,
+				PermitLimit = 10,
+				QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+				QueueLimit = 0,
+				Window = TimeSpan.FromSeconds(5)
+			}));
+});
 
 var app = builder.Build();
+
+app.UseRateLimiter();
+
+app.MapGet("/", () => "Hello World!");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
