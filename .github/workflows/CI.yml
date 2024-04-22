@@ -3,7 +3,7 @@ name: CI
 on: 
   pull_request:
     branches:
-      - testing
+      - Testing
 
 jobs:
   test:
@@ -24,8 +24,6 @@ jobs:
         working-directory: ./auth-tests
         
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Set up JDK 17
         uses: actions/setup-java@v1
         with:
@@ -52,9 +50,11 @@ jobs:
       - name: Build and analyze
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"Sample" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"auth.service" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}"
           dotnet build
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+
+          
   OWASP:
     name: OWASP
     runs-on: ubuntu-latest
