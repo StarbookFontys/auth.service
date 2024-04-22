@@ -34,7 +34,7 @@ namespace auth_tests
 		{
 			ConnectionString = "Host=firstcluster-14261.8nj.gcp-europe-west1.cockroachlabs.cloud;Port=26257;Database=defaultdb;Password=pM6WlZHYezsnKfLKdW5-Cw;SSL Mode=VerifyFull;Username=coen";
 
-			var builder = new ConfigurationBuilder();
+			var builder = new ConfigurationBuilder(); 
 
 			Configuration = builder.Build();
 			authController = new AuthController(Configuration);
