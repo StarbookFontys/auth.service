@@ -17,4 +17,4 @@ jobs:
           docker build . --tag auth-service
           docker stop auth-service
           docker remove auth-service
-          docker run -d --rm -it -p 8081:80 -p 8082:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORTS=8001 -e ASPNETCORE_Kestrel__Certificates__Default__Password="<CREDENTIAL_PLACEHOLDER>" -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx -v %USERPROFILE%\.aspnet\https:/https/ mcr.microsoft.com/dotnet/samples:aspnetapp
+          docker run -d --rm -it -p 8081:8080 --name auth-service auth
