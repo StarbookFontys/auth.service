@@ -58,6 +58,37 @@ namespace authentication_service.DAL
 			}
 		}
 
+		public void UpdateEmail(string OldEmail, string NewEmail)
+		{
+			con.Open();
+
+			NpgsqlCommand cmd = new NpgsqlCommand();
+
+			cmd.Connection = con.GetConnectionString();
+			string updateQuery = "UPDATE hash_storage SET email = @NewEmail WHERE email = @OldEmail";
+			cmd.CommandText = updateQuery;
+			cmd.Parameters.AddWithValue("@OldEmail", OldEmail);
+			cmd.Parameters.AddWithValue("NewEmail", NewEmail);
+			cmd.ExecuteNonQuery();
+
+			con.Close();
+		}
+
+		public void UpdatePassword(string Email,  string Hash, string Salt)
+		{
+			con.Open();
+
+			NpgsqlCommand cmd = new NpgsqlCommand();
+			cmd.Connection = con.GetConnectionString();
+			string updateQuery = "UPDATE hash_storage SET hash = @NewHash, salt = @NewSalt WHERE email = @Email";
+			cmd.CommandText = updateQuery;
+			cmd.Parameters.AddWithValue("@NewHash", Hash);
+			cmd.Parameters.AddWithValue("@NewSalt", Salt);
+			cmd.Parameters.AddWithValue("@Email", Email);
+			cmd.ExecuteNonQuery();
+			con.Close();
+		}
+
 		public (string salt, string hash) GetHashInformation(string email)
 		{
 			string salt = "null";
