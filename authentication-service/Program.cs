@@ -35,7 +35,7 @@ var app = builder.Build();
 
 app.UseRateLimiter();
 
-app.MapGet("/", () => "Hello World!");
+app.MapGet("/", () => "The authentication api.");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
