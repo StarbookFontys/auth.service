@@ -1,4 +1,5 @@
 ﻿using auth_tests.DAL;
+using auth_tests.RabbitMq;
 using auth_tests.TestModels;
 using authentication_service.Business;
 using authentication_service.Controllers;
@@ -28,7 +29,8 @@ namespace auth_tests
 		private readonly IConnection con;
 		private readonly AuthController authController;
 		private readonly IConfiguration Configuration;
-		private readonly string email; 
+		private readonly string email;
+		private readonly Rabbitmqdummy rabbitmqdummy;
 
 		public UserInteractionTests()
 		{
@@ -41,7 +43,8 @@ namespace auth_tests
 			con = new Connection(ConnectionString);
 			Register = new Register(con);
 			Unregister = new Unregister(con);
-			accountManagement = new AccountManagement(Unregister, Register);
+			rabbitmqdummy = new Rabbitmqdummy();
+			accountManagement = new AccountManagement(Unregister, Register, rabbitmqdummy);
 			samplesalt = Convert.FromBase64String("i443zd2/bhb1+3BTfSInmQ==");
 
 			sampleuserinfo = new UserInfo
