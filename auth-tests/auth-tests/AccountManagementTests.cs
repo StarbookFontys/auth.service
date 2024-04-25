@@ -3,6 +3,7 @@ using authentication_service.Interfaces;
 using auth_tests.DAL;
 using authentication_service.Models;
 using auth_tests.TestModels;
+using auth_tests.RabbitMq;
 
 namespace auth_tests
 {
@@ -15,12 +16,15 @@ namespace auth_tests
 		private readonly byte[] samplesalt;
 		private readonly HashInfo samplehash;
 		private readonly UserInfo sampleuserinfo;
+		private readonly string samplepassword;
+		private readonly Rabbitmqdummy rabbitmqdummy;
 
 		public AccountManagementTests() 
 		{
 			registerDummy = new RegisterDummy();
 			unregisterDummy = new Unregisterdummy();
-			accountManagement = new AccountManagement(unregisterDummy, registerDummy);
+			rabbitmqdummy = new Rabbitmqdummy();
+			accountManagement = new AccountManagement(unregisterDummy, registerDummy, rabbitmqdummy);
 			samplesalt = Convert.FromBase64String("i443zd2/bhb1+3BTfSInmQ==");
 			sampleuserinfo = new UserInfo
 			{
