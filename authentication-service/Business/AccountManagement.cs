@@ -1,6 +1,7 @@
 ﻿using authentication_service.DAL;
 using authentication_service.Exceptions;
 using authentication_service.Interfaces;
+using authentication_service.RabbitMq;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 
 namespace authentication_service.Business
@@ -10,12 +11,14 @@ namespace authentication_service.Business
 		private readonly IUnregister unregister;
 		private readonly IRegister register;
 		private readonly Encryptor encryptor;
+		private readonly IRabbitMqManagement rabbitMqManagement;
 
-		public AccountManagement(IUnregister _unregister, IRegister _register)
+		public AccountManagement(IUnregister _unregister, IRegister _register, IRabbitMqManagement _rabbitMqManagement)
 		{
 			unregister = _unregister;
 			register = _register;
 			encryptor = new Encryptor();
+			rabbitMqManagement = _rabbitMqManagement;
 		}
 
 		public void SaveInformation(string email, string password)
@@ -64,6 +67,12 @@ namespace authentication_service.Business
 			if (VerifyInformation(email, password))
 			{
 				unregister.RemoveUserData(email);
+				var BrokerMessage = new RabbitMqMessageModel
+				{
+					Action = "Delete",
+					Value = email
+				};
+				rabbitMqManagement.SendMessage(BrokerMessage);
 			}
 			else
 			{

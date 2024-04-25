@@ -5,6 +5,7 @@ using System.Text;
 using authentication_service.DAL;
 using Npgsql;
 using authentication_service.Exceptions;
+using authentication_service.RabbitMq;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -19,6 +20,7 @@ namespace authentication_service.Controllers
 		private readonly string ConnectionString;
 		private readonly Encryptor encryptor;
 		private readonly AccountManagement accountManagement;
+		private readonly RabbitMqManagement rabbitMqManagement;
 
 		public AuthController(IConfiguration configuration)
 		{
@@ -27,7 +29,8 @@ namespace authentication_service.Controllers
 			var con = new Connection(ConnectionString);
 			var _register = new Register(con);
 			var _unregister = new Unregister(con);
-			accountManagement = new AccountManagement(_unregister, _register);
+			rabbitMqManagement = new RabbitMqManagement();
+			accountManagement = new AccountManagement(_unregister, _register, rabbitMqManagement);
 		}
 		[HttpGet("/VerifyPassword/{email}/{password}")]
 		public Boolean Get(string email, string password)
