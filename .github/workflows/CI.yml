@@ -21,7 +21,6 @@ jobs:
         working-directory: ./auth-tests
       - name: Test with the dotnet CLI
         run: dotnet test -o C:\Users\cpdon\Documents\Github\uh
-          -o C:\Users\cpdon\Documents\Github\uh
         working-directory: ./auth-tests
         
       - uses: actions/checkout@v2
