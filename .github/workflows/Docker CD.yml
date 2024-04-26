@@ -14,7 +14,9 @@ jobs:
       - uses: actions/checkout@v3
       - name: Rebuild posting service
         run: |
-          docker build . --tag auth-service
+          docker login --username coen-donk --password ${{ secrets.GHCR_TOKEN }}
+          docker build . -t ghcr.io/coen-donk/auth-service:latest
+          docker push ghcr.io/coen-donk/auth-service:latest
           docker stop auth-service
           docker remove auth-service
-          docker run -d -it -p 4000:80 -p 4001:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORTS=8001 -e ASPNETCORE_Kestrel__Certificates__Default__Password="mypassword" -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx -v C:\Users\cpdon\.aspnet\https:/https/ --name auth-service -t auth-service
+          docker run -d -it -p 4000:80 -p 4001:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORTS=8001 -e ASPNETCORE_Kestrel__Certificates__Default__Password="mypassword" -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx -v C:\Users\cpdon\.aspnet\https:/https/ --name auth-service ghcr.io/coen-donk/auth-service:latest
