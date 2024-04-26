@@ -25,7 +25,7 @@ namespace auth_tests
 		private readonly Unregister Unregister;
 		//private readonly byte[] samplesalt;
 		//private readonly HashInfo samplehash;
-		private readonly UserInfo sampleuserinfo;
+		private readonly UserInfo sampleuserinfo;	
 		private readonly IConnection con;
 		//private readonly string email;
 		private readonly Rabbitmqdummy rabbitmqdummy;
