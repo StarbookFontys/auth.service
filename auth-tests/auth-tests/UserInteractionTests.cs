@@ -41,11 +41,11 @@ namespace auth_tests
 			accountManagement = new AccountManagement(Unregister, Register, rabbitmqdummy);
 			//samplesalt = Convert.FromBase64String("i443zd2/bhb1+3BTfSInmQ==");
 
-			//sampleuserinfo = new UserInfo
-			//{
-			//	email = "notrealemail",
-			//	password = "111"
-			//};
+			sampleuserinfo = new UserInfo
+			{
+				email = "notrealemail",
+				password = "111"
+			};
 			//samplehash = new HashInfo
 			//{
 			//	email = "notrealemail",

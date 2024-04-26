@@ -18,7 +18,6 @@ namespace authentication_service.Controllers
 
 		private readonly IConfiguration _configuration;
 		private readonly string ConnectionString;
-		private readonly Encryptor encryptor;
 		private readonly AccountManagement accountManagement;
 		private readonly RabbitMqManagement rabbitMqManagement;
 
