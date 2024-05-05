@@ -24,7 +24,7 @@ namespace authentication_service.Controllers
 		public AuthController(IConfiguration configuration)
 		{
 			_configuration = configuration;
-			ConnectionString = _configuration.GetSection("ConnectionStrings").GetValue<string>("DevDatabase");
+			ConnectionString = _configuration["Database:ConnectionString"];
 			var con = new Connection(ConnectionString);
 			var _register = new Register(con);
 			var _unregister = new Unregister(con);
