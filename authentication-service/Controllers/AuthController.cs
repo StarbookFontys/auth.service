@@ -6,6 +6,8 @@ using authentication_service.DAL;
 using Npgsql;
 using authentication_service.Exceptions;
 using authentication_service.RabbitMq;
+using authentication_service.Models;
+using authentication_service.Enums;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -20,6 +22,7 @@ namespace authentication_service.Controllers
 		private readonly string ConnectionString;
 		private readonly AccountManagement accountManagement;
 		private readonly RabbitMqManagement rabbitMqManagement;
+		private readonly JWTManagement JWT;
 
 		public AuthController(IConfiguration configuration)
 		{
@@ -30,6 +33,7 @@ namespace authentication_service.Controllers
 			var _unregister = new Unregister(con);
 			rabbitMqManagement = new RabbitMqManagement();
 			accountManagement = new AccountManagement(_unregister, _register, rabbitMqManagement);
+			JWT = new JWTManagement(_configuration["JWT:Key"], _configuration["JWT:Issuer"]);
 		}
 		[HttpGet("/VerifyPassword/{email}/{password}")]
 		public Boolean Get(string email, string password)
