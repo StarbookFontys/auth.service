@@ -8,6 +8,7 @@ using authentication_service.Exceptions;
 using authentication_service.RabbitMq;
 using authentication_service.Models;
 using authentication_service.Enums;
+using authentication_service.GCloud;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -23,21 +24,24 @@ namespace authentication_service.Controllers
 		private readonly AccountManagement accountManagement;
 		private readonly RabbitMqManagement rabbitMqManagement;
 		private readonly JWTManagement JWT;
+		private readonly GCSecretManager gCSecretManager;
 
 		public AuthController(IConfiguration configuration)
 		{
 			_configuration = configuration;
-			ConnectionString = _configuration["Database:ConnectionString"];
+			gCSecretManager = new GCSecretManager();
+			ConnectionString = gCSecretManager.GetSecret("decisive-mapper-422519-b8", "AuthDatabaseConString");
 			var con = new Connection(ConnectionString);
 			var _register = new Register(con);
 			var _unregister = new Unregister(con);
 			rabbitMqManagement = new RabbitMqManagement();
 			accountManagement = new AccountManagement(_unregister, _register, rabbitMqManagement);
 			JWT = new JWTManagement(_configuration["JWT:Key"], _configuration["JWT:Issuer"]);
+
 		}
 		[HttpGet("/VerifyPassword/{email}/{password}")]
 		public Boolean Get(string email, string password)
-		{
+		{ 
 			return accountManagement.VerifyInformation(email, password);
 		}
 

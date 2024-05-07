@@ -9,6 +9,10 @@ var provider = builder.Services.BuildServiceProvider();
 
 var _configuration = provider.GetRequiredService<IConfiguration>();
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+var url = $"http://0.0.0.0:{port}";
+var target = Environment.GetEnvironmentVariable("TARGET") ?? "World";
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -38,7 +42,7 @@ app.UseMetricServer();
 
 app.UseRateLimiter();
 
-app.MapGet("/", () => "The authentication api.");
+app.MapGet("/", () => "The authentication api. Hello {target}!");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -53,4 +57,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+app.Run(url);
