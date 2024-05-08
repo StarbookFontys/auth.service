@@ -57,6 +57,9 @@ env:
 
 jobs:
   deploy:
+    permissions:
+     contents: 'read'
+     id-token: 'write'
     name: Deploy
     runs-on: self-hosted
     steps:
