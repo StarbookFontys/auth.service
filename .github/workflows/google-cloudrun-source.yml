@@ -75,22 +75,9 @@ jobs:
         run: dotnet publish -c Release -o ./publish
         working-directory: ./authentication-service
 
-      - name: Write service account key to file
-        run: echo "${{ secrets.SERVICE_JSON_SECRET }}" > key.json
-
-
-      - name: Write service account key to file
-        run: echo ${{ secrets.SERVICE_JSON_SECRET }} | base64 --decode > key.json
-  
-      - name: Show contents of key.json
-        run: type key.json
-
-      - name: Authenticate with gcloud
-        env:
-          PROJECT_ID: ${{ env.PROJECT_ID }}
-        run: |
-          gcloud auth activate-service-account --key-file=key.json
-          gcloud config set project $PROJECT_ID
+      - uses: 'google-github-actions/auth@v2'
+        with:
+           credentials_json: ${{ secrets.SERVICE_JSON_SECRET }}
           
       - name: Deploy to Google Cloud Run
         run: gcloud run deploy ${{ env.SERVICE }} --image ghcr.io/coen-donk/auth-service
