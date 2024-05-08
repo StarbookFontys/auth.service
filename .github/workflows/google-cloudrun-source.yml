@@ -83,3 +83,5 @@ jobs:
         uses: 'google-github-actions/deploy-cloudrun@v2'
         with:
            service: '${{ env.SERVICE }}'
+           image: '[IMAGE]'
+           #source: '/authentication-service'
