@@ -82,7 +82,6 @@ jobs:
           project_id: '${{ env.PROJECT_ID }}'
           workload_identity_provider: 'projects/376291505990/locations/global/workloadIdentityPools/github/providers/auth-repo' #'${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
           service_account: 'service-bob@decisive-mapper-422519-b8.iam.gserviceaccount.com' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
-          token_format: 'access_token'
 
       - name: Deploy to Google Cloud Run
         run: gcloud run deploy ${{ env.SERVICE }} --image ghcr.io/coen-donk/auth-service
