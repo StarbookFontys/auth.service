@@ -78,6 +78,10 @@ jobs:
       - name: Write service account key to file
         run: echo "${{ secrets.SERVICE_JSON_SECRET }}" > key.json
 
+
+      - name: Write service account key to file
+        run: echo ${{ secrets.SERVICE_JSON_SECRET }} | base64 --decode > key.json
+  
       - name: Show contents of key.json
         run: type key.json
 
