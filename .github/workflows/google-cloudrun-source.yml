@@ -80,4 +80,4 @@ jobs:
            credentials_json: ${{ secrets.SERVICE_JSON_SECRET }}
           
       - name: Deploy to Google Cloud Run
-        run: gcloud run deploy ${{ env.SERVICE }} --image ghcr.io/coen-donk/auth-service
+        run: gcloud run deploy ${{ env.SERVICE }}
