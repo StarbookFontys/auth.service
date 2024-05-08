@@ -57,40 +57,29 @@ env:
 
 jobs:
   deploy:
-    # Add 'id-token' with the intended permissions for workload identity federation
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-
+    name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Google Auth
-        id: auth
-        uses: 'google-github-actions/auth@v2'
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
         with:
-          project_id: '${{ env.PROJECT_ID }}'
-          workload_identity_provider: 'projects/376291505990/locations/global/workloadIdentityPools/github/providers/auth-repo' #'${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
-          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+          dotnet-version: '3.1'  # Change this to your desired .NET version
 
-      # NOTE: Alternative option - authentication via credentials json
-      # - name: Google Auth
-      #   id: auth
-      #   uses: 'google-github-actions/auth@v0'
-      #   with:
-      #     credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+      - name: Build and publish
+        run: dotnet publish -c Release -o ./publish
 
-      - name: Deploy to Cloud Run
-        id: deploy
-        uses: google-github-actions/deploy-cloudrun@v2
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v0
         with:
-          service: ${{ env.SERVICE }}
-          region: ${{ env.REGION }}
-          # NOTE: If required, update to the appropriate source folder
-          source: ./authentication-service
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
 
-      # If required, use the Cloud Run url output in later steps
-      - name: Show Output
-        run: echo ${{ steps.deploy.outputs.url }}
+      - name: Set Google Cloud project ID
+        run: gcloud config set project YOUR_PROJECT_ID
+        env:
+          YOUR_PROJECT_ID: ${{ env.PROJECT_ID }}
+
+      - name: Deploy to Google Cloud Run
+        run: gcloud run deploy ${{ env.SERVICE }} --image ghcr.io/coen-donk/auth-service --platform managed --region ${{ env.REGION }}
