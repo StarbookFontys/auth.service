@@ -52,7 +52,7 @@ on:
 
 env:
   PROJECT_ID: decisive-mapper-422519-b8 # TODO: update Google Cloud project id
-  SERVICE: authservice # TODO: update Cloud Run service name
+  SERVICE: authentication-service # TODO: update Cloud Run service name
   REGION: europe-west4 # TODO: update Cloud Run service region
 
 jobs:
@@ -72,17 +72,13 @@ jobs:
         run: dotnet publish -c Release -o ./publish
         working-directory: ./authentication-service
 
-      - name: Authenticate with Google Cloud
-        run: |
-          echo ${{ secrets.GOOGLE_CREDENTIALS }} > key.json
-          gcloud auth activate-service-account --key-file=key.json
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: key.json
-
-      - name: Set Google Cloud project ID
-        run: gcloud config set project YOUR_PROJECT_ID
-        env:
-          YOUR_PROJECT_ID: ${{ env.PROJECT_ID }}
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: '${{ env.PROJECT_ID }}'
+          workload_identity_provider: 'projects/376291505990/locations/global/workloadIdentityPools/github/providers/auth-repo' #'${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
 
       - name: Deploy to Google Cloud Run
-        run: gcloud run deploy ${{ env.SERVICE }} --image ghcr.io/coen-donk/auth-service --platform managed --region ${{ env.REGION }}
+        run: gcloud run deploy ${{ env.SERVICE }} --image ghcr.io/coen-donk/auth-service
