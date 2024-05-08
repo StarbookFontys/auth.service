@@ -72,10 +72,14 @@ jobs:
         run: dotnet publish -c Release -o ./publish
         working-directory: ./authentication-service
 
+      - name: Create Cypress config files
+        run: |
+          echo ${{ secrets.GOOGLE_CREDENTIALS }} | base64 -d > google_credentials.json
+
       - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+          credentials_json: google_credentials.json
 
       - name: Set Google Cloud project ID
         run: gcloud config set project YOUR_PROJECT_ID
