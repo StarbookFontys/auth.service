@@ -78,6 +78,9 @@ jobs:
       - name: Write service account key to file
         run: echo "${{ secrets.SERVICE_JSON_SECRET }}" > key.json
 
+      - name: Show contents of key.json
+        run: type key.json
+
       - name: Authenticate with gcloud
         env:
           PROJECT_ID: ${{ env.PROJECT_ID }}
