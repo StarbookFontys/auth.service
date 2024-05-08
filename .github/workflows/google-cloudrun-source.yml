@@ -75,13 +75,15 @@ jobs:
         run: dotnet publish -c Release -o ./publish
         working-directory: ./authentication-service
 
-      - name: Google Auth
-        id: auth
-        uses: 'google-github-actions/auth@v2'
-        with:
-          project_id: '${{ env.PROJECT_ID }}'
-          workload_identity_provider: 'projects/376291505990/locations/global/workloadIdentityPools/github/providers/auth-repo' #'${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
-          service_account: 'service-bob@decisive-mapper-422519-b8.iam.gserviceaccount.com' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+      - name: Write service account key to file
+        run: echo "${{ secrets.SERVICE_JSON_SECRET }}" > key.json
 
+      - name: Authenticate with gcloud
+        env:
+          PROJECT_ID: ${{ env.PROJECT_ID }}
+        run: |
+          gcloud auth activate-service-account --key-file=key.json
+          gcloud config set project $PROJECT_ID
+          
       - name: Deploy to Google Cloud Run
         run: gcloud run deploy ${{ env.SERVICE }} --image ghcr.io/coen-donk/auth-service
