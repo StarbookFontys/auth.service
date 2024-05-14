@@ -117,5 +117,41 @@ namespace authentication_service.DAL
 				return (salt, hash); 
 			}
 		}
+
+		public Boolean IsAdmin(string email)
+		{
+			string role = "user"; // Default role if email not found or error occurs
+
+			con.Open();
+
+			// Prepare SQL command
+			string sql = "SELECT role FROM hash_storage WHERE email = @Email";
+			using (NpgsqlCommand command = new NpgsqlCommand(sql, con.GetConnectionString()))
+			{
+				// Add parameter for email
+				command.Parameters.AddWithValue("@Email", email);
+
+				// Execute SQL command and get the result
+				using (NpgsqlDataReader reader = command.ExecuteReader())
+				{
+					// Check if any rows returned
+					if (reader.Read())
+					{
+						// Get the role value from the result
+						role = reader.GetString(reader.GetOrdinal("role"));
+					}
+				}
+			}
+			con.Close();
+
+			if (role == "admin")
+			{
+				return true;
+			}
+			else
+			{
+				return false; 
+			}
+		}
 	}
 }
