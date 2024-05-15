@@ -89,7 +89,7 @@ app.MapMetrics();
 
 if (app.Environment.IsProduction())
 {
-	app.Run(url);
+	app.Run();
 }
 
 if (app.Environment.IsDevelopment()) 
