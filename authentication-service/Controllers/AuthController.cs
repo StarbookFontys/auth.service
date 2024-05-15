@@ -30,11 +30,11 @@ namespace authentication_service.Controllers
 		public AuthController(IConfiguration configuration)
 		{
 			_configuration = configuration;
-			ConnectionString = _configuration["Database:ConnectionString"];
-			var con = new Connection(ConnectionString);	
+			//ConnectionString = _configuration["Database:ConnectionString"];
+			//var con = new Connection(ConnectionString);	
 			gCSecretManager = new GCSecretManager();
-			//ConnectionString = gCSecretManager.GetSecret("decisive-mapper-422519-b8", "AuthDatabaseConString");
-			//var con = new Connection(ConnectionString);
+			ConnectionString = gCSecretManager.GetSecret("decisive-mapper-422519-b8", "AuthDatabaseConString");
+			var con = new Connection(ConnectionString);
 			var _register = new Register(con);
 			var _unregister = new Unregister(con);
 			rabbitMqManagement = new RabbitMqManagement();
