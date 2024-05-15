@@ -8,6 +8,7 @@ using authentication_service.Exceptions;
 using authentication_service.RabbitMq;
 using authentication_service.Models;
 using authentication_service.Enums;
+using authentication_service.GCloud;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,23 +23,44 @@ namespace authentication_service.Controllers
 		private readonly string ConnectionString;
 		private readonly AccountManagement accountManagement;
 		private readonly RabbitMqManagement rabbitMqManagement;
+		private readonly JWTManagement JWTManager;
 		private readonly JWTManagement JWT;
+		private readonly GCSecretManager gCSecretManager;
 
 		public AuthController(IConfiguration configuration)
 		{
 			_configuration = configuration;
 			ConnectionString = _configuration["Database:ConnectionString"];
-			var con = new Connection(ConnectionString);
+			var con = new Connection(ConnectionString);	
+			gCSecretManager = new GCSecretManager();
+			//ConnectionString = gCSecretManager.GetSecret("decisive-mapper-422519-b8", "AuthDatabaseConString");
+			//var con = new Connection(ConnectionString);
 			var _register = new Register(con);
 			var _unregister = new Unregister(con);
 			rabbitMqManagement = new RabbitMqManagement();
-			accountManagement = new AccountManagement(_unregister, _register, rabbitMqManagement);
+			JWTManager = new JWTManagement(_configuration.GetValue<string>("ApplicationSettings:JWT_Secret"), _configuration["JWT:Issuer"]);
+			accountManagement = new AccountManagement(_unregister, _register, rabbitMqManagement, JWTManager);
 			JWT = new JWTManagement(_configuration["JWT:Key"], _configuration["JWT:Issuer"]);
+
 		}
 		[HttpGet("/VerifyPassword/{email}/{password}")]
-		public Boolean Get(string email, string password)
+		public JWTReturn Get(string email, string password)
 		{
-			return accountManagement.VerifyInformation(email, password);
+			return accountManagement.CreateJWT(email, password);
+		}
+
+		[HttpGet("/VerifyJWt/{JWT}")]
+		public IResult Get(string JWT)
+		{
+			try
+			{
+				JWTManager.ValidateToken(JWT);
+				return Results.Ok();
+			}
+			catch (Exception ex)
+			{
+				return Results.Problem("Error during JWT validation. Incorrect JWT formatting");
+			}
 		}
 
 		[HttpPost("/CreateAccount/{email}/{password}")]

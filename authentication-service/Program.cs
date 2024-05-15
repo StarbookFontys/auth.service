@@ -2,6 +2,13 @@ using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.RateLimiting;
 using Prometheus;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Configuration;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +22,28 @@ var target = Environment.GetEnvironmentVariable("TARGET") ?? "World";
 
 // Add services to the container.
 
+builder.Services.AddAuthentication(cfg => {
+	cfg.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+	cfg.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+	cfg.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(x => {
+	x.RequireHttpsMetadata = false;
+	x.SaveToken = false;
+	x.TokenValidationParameters = new TokenValidationParameters
+	{
+		ValidateIssuerSigningKey = true,
+		IssuerSigningKey = new SymmetricSecurityKey(
+			Encoding.UTF8
+			.GetBytes(builder.Configuration["ApplicationSettings:JWT_Secret"])
+		),
+		ValidateIssuer = false,
+		ValidateAudience = false,
+		ClockSkew = TimeSpan.Zero
+	};
+});
+
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -42,9 +70,9 @@ app.UseMetricServer();
 
 app.UseRateLimiter();
 
-app.MapGet("/", () => "$The authentication api. Hello {target}!");
+app.MapGet("/", () => "The authentication api. Hello {target}!");
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
@@ -57,4 +85,12 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run(url);
+if (app.Environment.IsProduction())
+{
+	app.Run(url);
+}
+
+if (app.Environment.IsDevelopment()) 
+{
+	app.Run();
+}

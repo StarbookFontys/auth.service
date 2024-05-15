@@ -25,7 +25,7 @@ namespace auth_tests
 		private readonly Unregister Unregister;
 		//private readonly byte[] samplesalt;
 		//private readonly HashInfo samplehash;
-		private readonly UserInfo sampleuserinfo;	
+		private readonly TestModels.UserInfo sampleuserinfo;	
 		private readonly IConnection con;
 		//private readonly string email;
 		private readonly Rabbitmqdummy rabbitmqdummy;
@@ -41,7 +41,7 @@ namespace auth_tests
 			accountManagement = new AccountManagement(Unregister, Register, rabbitmqdummy);
 			//samplesalt = Convert.FromBase64String("i443zd2/bhb1+3BTfSInmQ==");
 
-			sampleuserinfo = new UserInfo
+			sampleuserinfo = new TestModels.UserInfo
 			{
 				email = "notrealemail",
 				password = "111"
