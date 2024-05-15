@@ -72,6 +72,7 @@ app.UseRateLimiter();
 
 app.MapGet("/", () => "The authentication api. Hello {target}!");
 
+
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
@@ -93,4 +94,3 @@ if (app.Environment.IsDevelopment())
 {
 	app.Run();
 }
-
