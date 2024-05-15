@@ -85,6 +85,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapMetrics();
+
 if (app.Environment.IsProduction())
 {
 	app.Run(url);
