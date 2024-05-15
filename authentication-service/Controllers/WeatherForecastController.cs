@@ -21,13 +21,7 @@ namespace authentication_service.Controllers
 		[HttpGet(Name = "GetWeatherForecast")]
 		public async Task<IActionResult> Get()
 		{
-			return Ok(Enumerable.Range(1, 5).Select(index => new WeatherForecast
-			{
-				Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-				TemperatureC = Random.Shared.Next(-20, 55),
-				Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-			})
-			.ToArray());
+			return Ok("I have no mouth but I must scream.");
 		}
 	}
 }
