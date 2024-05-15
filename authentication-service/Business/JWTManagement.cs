@@ -1,12 +1,16 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using authentication_service.Interfaces;
+using System.Security.Principal;
+using System.IO;
 
 namespace authentication_service.Business
 {
-	public class JWTManagement
+	public class JWTManagement : IJWTManagement
 	{
 		private readonly string _secretKey;
 		private readonly string _issuer;
@@ -14,28 +18,70 @@ namespace authentication_service.Business
 		public JWTManagement(string secretKey, string issuer)
 		{
 			_secretKey = secretKey; //UserSecret 
-			_issuer = issuer; //Website name 
+			_issuer = issuer; //Website name
 		}
 
-		public string GenerateToken(string email, string userLevel)
+		public string GenerateJWTToken(string email, string userlevel)
 		{
-			var tokenHandler = new JwtSecurityTokenHandler();
-			var key = Encoding.ASCII.GetBytes(_secretKey);
-
-			var tokenDescriptor = new SecurityTokenDescriptor
+			var claims = new List<Claim> 
 			{
-				Subject = new ClaimsIdentity(new Claim[]
-				{
 				new Claim(ClaimTypes.Email, email),
-				new Claim("user_level", userLevel)
-				}),
-				Expires = DateTime.UtcNow.AddDays(7),
-				Issuer = _issuer,
-				SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+				new Claim(ClaimTypes.Role, userlevel),
 			};
+			var jwtToken = new JwtSecurityToken(
+				claims: claims,
+				notBefore: DateTime.UtcNow,
+				expires: DateTime.UtcNow.AddDays(30),
+				signingCredentials: new SigningCredentials(
+					new SymmetricSecurityKey(
+					   Encoding.UTF8.GetBytes(_secretKey)
+						),
+					SecurityAlgorithms.HmacSha256Signature)
+				);
+			return new JwtSecurityTokenHandler().WriteToken(jwtToken);
+		}
 
-			var token = tokenHandler.CreateToken(tokenDescriptor);
-			return tokenHandler.WriteToken(token);
+		public bool ValidateToken(string AuthToken)
+		{
+			try
+			{
+				var tokenHandler = new JwtSecurityTokenHandler();
+				var validationParameters = new TokenValidationParameters()
+				{
+					ValidateLifetime = false,
+					ValidateIssuer = false,
+					ValidateAudience = false,
+					IssuerSigningKey = new SymmetricSecurityKey(
+						   Encoding.UTF8.GetBytes(_secretKey)
+							)
+				};
+				SecurityToken validatedToken;
+			IPrincipal principal = tokenHandler.ValidateToken(AuthToken, validationParameters, out validatedToken);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				throw new FormatException();
+			}
+		}
+
+		public (string email, Boolean isAdmin) JWTDecoder(string jwtToken)
+		{
+			try
+			{
+				var handler = new JwtSecurityTokenHandler();
+				var jsonToken = handler.ReadToken(jwtToken);
+				var DecodedToken = jsonToken as JwtSecurityToken;
+
+				var emailClaim = DecodedToken.Claims.FirstOrDefault(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress");
+				var roleClaim = DecodedToken.Claims.FirstOrDefault(claim => claim.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
+
+				return (emailClaim.Value, Convert.ToBoolean(roleClaim.Value));
+			}
+			catch(Exception ex)
+			{
+				throw new SecurityTokenValidationException();
+			}
 		}
 	}
 }
