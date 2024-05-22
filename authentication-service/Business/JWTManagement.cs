@@ -73,10 +73,16 @@ namespace authentication_service.Business
 				var jsonToken = handler.ReadToken(jwtToken);
 				var DecodedToken = jsonToken as JwtSecurityToken;
 
-				var emailClaim = DecodedToken.Claims.FirstOrDefault(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress");
-				var roleClaim = DecodedToken.Claims.FirstOrDefault(claim => claim.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
+				var emailClaim = DecodedToken.Claims.FirstOrDefault(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
+				var roleClaim = DecodedToken.Claims.FirstOrDefault(claim => claim.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
 
-				return (emailClaim.Value, Convert.ToBoolean(roleClaim.Value));
+				if (emailClaim == null || roleClaim == null)
+				{
+					throw new SecurityTokenValidationException();
+				}
+
+				bool roleValue = bool.Parse(roleClaim);
+				return (emailClaim, roleValue);
 			}
 			catch(Exception ex)
 			{
