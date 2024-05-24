@@ -2,36 +2,35 @@
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Hosting;
-using System.Runtime.Caching; 
+using Microsoft.Extensions.Caching;
 
 namespace authentication_service.DAL.Caching
 {
-	public class CacheManager
+	public class CacheManager<TValue>
 	{
-		private readonly TimeSpan _defaultExpieration;
-		private const string CacheKey = "1";
-		CacheItemPolicy cacheItemPolicy = new CacheItemPolicy();
-		ObjectCache Cache = System.Runtime.Caching.MemoryCache.Default;
-		public CacheManager()
-		{
-			cacheItemPolicy.AbsoluteExpiration = DateTime.Now.AddHours(1.0);
-		}
+		private readonly MemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
 
-		public void AddCache()
+		public TValue GetOrCreate(object key, Func<TValue> createItem)
 		{
-			var VALUE = new CacheUserModel
+			TValue cacheEntry;
+			if (!_cache.TryGetValue(key, out cacheEntry))// Look for cache key.
 			{
-				email = "no",
-				AccessLevel = Enums.Userlevel.admin
-			};
-			Cache.Add(CacheKey, VALUE, cacheItemPolicy);
-		}
+				// Key not in cache, so get data.
+				cacheEntry = createItem();
 
-		public CacheUserModel ReadCache()
-		{
+				var cacheEntryOptions = new MemoryCacheEntryOptions()
+					.SetSize(1)//Size amount
+					//Priority on removing when reaching size limit (memory pressure)
+					.SetPriority(CacheItemPriority.High)
+					// Keep in cache for this time, reset time if accessed.
+					.SetSlidingExpiration(TimeSpan.FromSeconds(30))
+					// Remove from cache after this time, regardless of sliding expiration
+					.SetAbsoluteExpiration(TimeSpan.FromSeconds(120));
 
-			var ReturnValue = Cache.Get(CacheKey);
-			return (CacheUserModel)ReturnValue;
+				// Save data in cache.
+				_cache.Set(key, cacheEntry, cacheEntryOptions);
+			}
+			return cacheEntry;
 		}
 	}
 }

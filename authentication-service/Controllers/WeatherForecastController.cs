@@ -8,16 +8,16 @@ namespace authentication_service.Controllers
 	[Route("[controller]")]
 	public class WeatherForecastController : ControllerBase
 	{
+		private CacheManager<string> cacheManager;
 		private static readonly string[] Summaries = new[]
 		{
 			"Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+
 		};
 
-		private readonly ILogger<WeatherForecastController> _logger;
-
-		public WeatherForecastController(ILogger<WeatherForecastController> logger)
+		public WeatherForecastController(ILogger<WeatherForecastController> logger, CacheManager<string> _cacheManager)
 		{
-			_logger = logger;
+			cacheManager = _cacheManager;
 		}
 		[HttpGet(Name = "GetWeatherForecast")]
 		public async Task<IActionResult> Get()
@@ -25,13 +25,16 @@ namespace authentication_service.Controllers
 			return Ok("I have no mouth but I must scream.");
 		}
 
-		[HttpGet("/{Value}")]
-		public async Task<IActionResult> Get(string Value)
+		[HttpPost("{Key}")]
+		public async Task<IActionResult> Post(string key)
 		{
-			CacheManager cacheManager = new DAL.Caching.CacheManager();
-			cacheManager.AddCache();
-			DAL.Caching.CacheModels.CacheUserModel ValueReturned = cacheManager.ReadCache();
-			return Ok(ValueReturned);
+			cacheManager.GetOrCreate(key,() => CreateUserValue());
+			return Ok();
+		}
+
+		private string CreateUserValue()
+		{
+			return "UserValue";
 		}
 	}
 }

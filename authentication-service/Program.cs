@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using System.Text;
+using authentication_service.DAL.Caching;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,13 +42,12 @@ builder.Services.AddAuthentication(cfg => {
 		ClockSkew = TimeSpan.Zero
 	};
 });
-
+builder.Services.AddSingleton(typeof(CacheManager<>));
 builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 builder.Services.AddRateLimiter(options =>
 {
 	options.RejectionStatusCode = 429;
