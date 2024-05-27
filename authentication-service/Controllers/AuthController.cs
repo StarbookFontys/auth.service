@@ -63,6 +63,14 @@ namespace authentication_service.Controllers
 			}
 		}
 
+		[HttpGet()]
+		public IResult Get()
+		{
+			var register = new Register(new Connection(ConnectionString));
+			int percentage = 5; 
+			return Results.Ok(register.BetaUsers(percentage));
+		}
+
 		[HttpPost("/CreateAccount/{email}/{password}")]
 		public IResult Post(string email, string password)
 		{
@@ -71,16 +79,18 @@ namespace authentication_service.Controllers
 				accountManagement.SaveInformation(email, password);
 				return Results.Ok();
 			}
-			catch(PasswordIncorrectEx ex)
+			catch (PasswordIncorrectEx ex)
 			{
 				return Results.Problem(ex.Message);
 			}
+
 		}
 
 		// POST api/<AuthController>
 		[HttpPost]
 		public void Post([FromBody] string value)
 		{
+
 		}
 
 		// PUT api/<AuthController>/5

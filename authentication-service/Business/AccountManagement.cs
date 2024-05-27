@@ -115,6 +115,7 @@ namespace authentication_service.Business
 		{
 			if(VerifyInformation(email, password))
 			{
+				register.LogAccess(email);
 				return new JWTReturn
 				{
 					VerifiyInformation = true,

@@ -3,6 +3,7 @@ using authentication_service.DAL;
 using authentication_service.Interfaces;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
+using System.Data;
 
 namespace authentication_service.DAL
 {
@@ -152,6 +153,81 @@ namespace authentication_service.DAL
 			{
 				return false; 
 			}
+		}
+
+		public void LogAccess(string email)
+		{
+			string query = "UPDATE hash_storage SET last_accessed = @currentDateTime WHERE email = @email";
+
+
+			con.Open();
+
+			using (NpgsqlCommand command = new NpgsqlCommand(query, con.GetConnectionString()))
+			{
+				command.Parameters.AddWithValue("currentDateTime", DateTime.Now);
+				command.Parameters.AddWithValue("email", email);
+
+				int rowsAffected = command.ExecuteNonQuery();
+			}
+
+			con.Close();
+		}
+
+		public string BetaUsers(double percentage)
+		{
+			con.Open();
+
+			// Calculate date one year ago
+			DateTime oneYearAgo = DateTime.Now.AddYears(-1);
+
+			// Calculate date one month ago
+			DateTime oneMonthAgo = DateTime.Now.AddMonths(-1);
+
+			// Query to select users based on criteria
+			string sql = "SELECT email FROM hash_storage WHERE account_created_at >= @oneYearAgo AND last_accessed >= @oneMonthAgo";
+
+			// Prepare the command
+			NpgsqlCommand command = new NpgsqlCommand(sql, con.GetConnectionString());
+			command.Parameters.AddWithValue("@oneYearAgo", oneYearAgo);
+			command.Parameters.AddWithValue("@oneMonthAgo", oneMonthAgo);
+
+			// Execute the query and read the result
+			NpgsqlDataReader reader = command.ExecuteReader();
+
+			List<string> selectedEmails = new List<string>();
+
+			while (reader.Read())
+			{
+				selectedEmails.Add(reader.GetString(0));
+			}
+
+			// Close the reader
+			reader.Close();
+
+			// Calculate the number of users to display based on percentage
+			int displayCount = (int)(selectedEmails.Count * (percentage / 100));
+
+			// Randomly select users to display
+			Random random = new Random();
+			HashSet<int> selectedIndexes = new HashSet<int>();
+
+			while (selectedIndexes.Count < displayCount)
+			{
+				int index = random.Next(selectedEmails.Count);
+				selectedIndexes.Add(index);
+			}
+
+			// Build the result string
+			string result = "";
+			foreach (int index in selectedIndexes)
+			{
+				result += selectedEmails[index] + "\n"; // You can use any delimiter you prefer
+			}
+
+			// Return the result string
+			con.Close();
+
+			return result;
 		}
 	}
 }
