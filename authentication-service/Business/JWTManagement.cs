@@ -21,12 +21,13 @@ namespace authentication_service.Business
 			_issuer = issuer; //Website name
 		}
 
-		public string GenerateJWTToken(string email, string userlevel)
+		public string GenerateJWTToken(string email, string userlevel, bool betaUser)
 		{
-			var claims = new List<Claim> 
+			var claims = new List<Claim>
 			{
 				new Claim(ClaimTypes.Email, email),
 				new Claim(ClaimTypes.Role, userlevel),
+				new Claim("betaUser", betaUser.ToString())
 			};
 			var jwtToken = new JwtSecurityToken(
 				claims: claims,

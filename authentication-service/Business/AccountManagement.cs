@@ -120,7 +120,7 @@ namespace authentication_service.Business
 				{
 					VerifiyInformation = true,
 
-					JWTToken = JWT.GenerateJWTToken(email, Convert.ToString(register.IsAdmin(email)))
+					JWTToken = JWT.GenerateJWTToken(email, Convert.ToString(register.IsAdmin(email)), register.isBetaUser(email))
 				};
 			}
 			else

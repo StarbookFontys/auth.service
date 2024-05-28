@@ -4,6 +4,7 @@ using authentication_service.Interfaces;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Data;
+using System.Text.Json;
 
 namespace authentication_service.DAL
 {
@@ -173,7 +174,31 @@ namespace authentication_service.DAL
 			con.Close();
 		}
 
-		public string BetaUsers(double percentage)
+		public Boolean isBetaUser(string email)
+		{
+			bool betaUser = false;
+
+			con.Open();
+
+			using (var command = new NpgsqlCommand("SELECT beta_user FROM hash_storage WHERE email = @Email", con.GetConnectionString()))
+			{
+				command.Parameters.AddWithValue("Email", email);
+
+				using (var reader = command.ExecuteReader())
+				{
+					if (reader.Read())
+					{
+						betaUser = reader.GetBoolean(0);
+					}
+				}
+			}
+
+			con.Close();
+
+			return betaUser;
+		}
+
+		public string BetaUsers(double targetPercentage)
 		{
 			con.Open();
 
@@ -184,7 +209,7 @@ namespace authentication_service.DAL
 			DateTime oneMonthAgo = DateTime.Now.AddMonths(-1);
 
 			// Query to select users based on criteria
-			string sql = "SELECT id, email FROM hash_storage WHERE account_created_at >= @oneYearAgo AND last_accessed >= @oneMonthAgo";
+			string sql = "SELECT id, email, beta_user FROM hash_storage WHERE account_created_at >= @oneYearAgo AND last_accessed >= @oneMonthAgo";
 
 			// Prepare the command
 			NpgsqlCommand command = new NpgsqlCommand(sql, con.GetConnectionString());
@@ -194,37 +219,68 @@ namespace authentication_service.DAL
 			// Execute the query and read the result
 			NpgsqlDataReader reader = command.ExecuteReader();
 
-			List<Tuple<long, string>> selectedUsers = new List<Tuple<long, string>>();
+			List<Tuple<long, string, bool>> selectedUsers = new List<Tuple<long, string, bool>>();
 
 			while (reader.Read())
 			{
-				selectedUsers.Add(new Tuple<long, string>(reader.GetInt64(0), reader.GetString(1)));
+				selectedUsers.Add(new Tuple<long, string, bool>(reader.GetInt64(0), reader.GetString(1), reader.GetBoolean(2)));
 			}
 
 			// Close the reader
 			reader.Close();
 
-			// Calculate the number of users to set as beta users based on percentage
-			int betaUserCount = (int)(selectedUsers.Count * (percentage / 100));
+			// Calculate the current percentage of beta users
+			int currentBetaUserCount = selectedUsers.Count(u => u.Item3);
+			double currentPercentage = (double)currentBetaUserCount / selectedUsers.Count * 100;
 
-			// Randomly select users to set as beta users
+			// Calculate the number of users to set or unset as beta users
+			int targetBetaUserCount = (int)(selectedUsers.Count * (targetPercentage / 100));
+			int betaUserCountDifference = targetBetaUserCount - currentBetaUserCount;
+
 			Random random = new Random();
-			HashSet<int> selectedIndexes = new HashSet<int>();
 
-			while (selectedIndexes.Count < betaUserCount)
+			if (betaUserCountDifference > 0)
 			{
-				int index = random.Next(selectedUsers.Count);
-				selectedIndexes.Add(index);
+				// Increase the number of beta users
+				List<Tuple<long, string, bool>> nonBetaUsers = selectedUsers.Where(u => !u.Item3).ToList();
+				HashSet<int> selectedIndexes = new HashSet<int>();
+
+				while (selectedIndexes.Count < betaUserCountDifference && selectedIndexes.Count < nonBetaUsers.Count)
+				{
+					int index = random.Next(nonBetaUsers.Count);
+					selectedIndexes.Add(index);
+				}
+
+				foreach (int index in selectedIndexes)
+				{
+					long userId = nonBetaUsers[index].Item1;
+					string updateSql = "UPDATE hash_storage SET beta_user = true WHERE id = @userId";
+					NpgsqlCommand updateCommand = new NpgsqlCommand(updateSql, con.GetConnectionString());
+					updateCommand.Parameters.AddWithValue("@userId", userId);
+					updateCommand.ExecuteNonQuery();
+				}
 			}
-
-			// Update the selected users to set beta_user flag to true
-			foreach (int index in selectedIndexes)
+			else if (betaUserCountDifference < 0)
 			{
-				long userId = selectedUsers[index].Item1;
-				string updateSql = "UPDATE hash_storage SET beta_user = true WHERE id = @userId";
-				NpgsqlCommand updateCommand = new NpgsqlCommand(updateSql, con.GetConnectionString());
-				updateCommand.Parameters.AddWithValue("@userId", userId);
-				updateCommand.ExecuteNonQuery();
+				// Decrease the number of beta users
+				List<Tuple<long, string, bool>> currentBetaUsers = selectedUsers.Where(u => u.Item3).ToList();
+				betaUserCountDifference = Math.Abs(betaUserCountDifference);
+				HashSet<int> selectedIndexes = new HashSet<int>();
+
+				while (selectedIndexes.Count < betaUserCountDifference && selectedIndexes.Count < currentBetaUsers.Count)
+				{
+					int index = random.Next(currentBetaUsers.Count);
+					selectedIndexes.Add(index);
+				}
+
+				foreach (int index in selectedIndexes)
+				{
+					long userId = currentBetaUsers[index].Item1;
+					string updateSql = "UPDATE hash_storage SET beta_user = false WHERE id = @userId";
+					NpgsqlCommand updateCommand = new NpgsqlCommand(updateSql, con.GetConnectionString());
+					updateCommand.Parameters.AddWithValue("@userId", userId);
+					updateCommand.ExecuteNonQuery();
+				}
 			}
 
 			// Query to select all users who are now beta users
@@ -232,18 +288,20 @@ namespace authentication_service.DAL
 			NpgsqlCommand selectBetaUsersCommand = new NpgsqlCommand(selectBetaUsersSql, con.GetConnectionString());
 			NpgsqlDataReader betaUserReader = selectBetaUsersCommand.ExecuteReader();
 
-			// Build the result string
-			string result = "";
+			// Collect the result emails into a list
+			List<string> resultEmails = new List<string>();
 			while (betaUserReader.Read())
 			{
-				result += betaUserReader.GetString(0) + "\n";
+				resultEmails.Add(betaUserReader.GetString(0));
 			}
 
 			// Close the reader and connection
 			betaUserReader.Close();
 			con.Close();
 
+			string result = JsonSerializer.Serialize(resultEmails);
+
 			return result;
-		}
+		} 
 	}
 }
