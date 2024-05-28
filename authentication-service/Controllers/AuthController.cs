@@ -67,7 +67,7 @@ namespace authentication_service.Controllers
 		public IResult Get()
 		{
 			var register = new Register(new Connection(ConnectionString));
-			int percentage = 5; 
+			int percentage = 2; 
 			return Results.Ok(register.BetaUsers(percentage));
 		}
 
