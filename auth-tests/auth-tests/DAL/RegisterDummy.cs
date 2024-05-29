@@ -10,7 +10,19 @@ namespace auth_tests.DAL
 
 		public bool IsAdmin(string email)
 		{
-			throw new NotImplementedException();
+
+			return true; 
+		}
+
+		public bool isBetaUser(string email)
+		{
+
+			return false; 
+		}
+
+		public void LogAccess(string email)
+		{
+			
 		}
 
 		public bool NoEmailExists(string email)

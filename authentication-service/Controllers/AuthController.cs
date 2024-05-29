@@ -81,7 +81,11 @@ namespace authentication_service.Controllers
 			}
 			catch (PasswordIncorrectEx ex)
 			{
-				return Results.Problem(ex.Message);
+				return Results.Ok(ex.Message);
+			}
+			catch(EmailAlreadyExistsEx ex)
+			{
+				return Results.Conflict(ex.Message);
 			}
 
 		}

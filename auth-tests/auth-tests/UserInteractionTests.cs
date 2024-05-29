@@ -6,6 +6,7 @@ using authentication_service.Controllers;
 using authentication_service.DAL;
 using authentication_service.Interfaces;
 using authentication_service.Models;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;

@@ -87,6 +87,12 @@ app.MapControllers();
 
 app.MapMetrics();
 
+app.UseCors(x => x
+		   .AllowAnyMethod()
+		   .AllowAnyHeader()
+		   .AllowAnyOrigin()
+		   .SetIsOriginAllowed(origin => true));
+
 if (app.Environment.IsProduction())
 {
 	app.Run();
