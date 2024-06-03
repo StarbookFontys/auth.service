@@ -8,5 +8,8 @@
 		public void UpdateEmail(string OldEmail, string NewEmail);
 		public void UpdatePassword(string Email,  string Password, string salt);
 		public Boolean IsAdmin(string email);
+		public void LogAccess(string email);
+		public Boolean isBetaUser(string email);
+		public string CreateBetaUsersBatch(double targetPercentage);
 	}
 }

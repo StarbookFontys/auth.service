@@ -115,11 +115,12 @@ namespace authentication_service.Business
 		{
 			if(VerifyInformation(email, password))
 			{
+				register.LogAccess(email);
 				return new JWTReturn
 				{
 					VerifiyInformation = true,
 
-					JWTToken = JWT.GenerateJWTToken(email, Convert.ToString(register.IsAdmin(email)))
+					JWTToken = JWT.GenerateJWTToken(email, Convert.ToString(register.IsAdmin(email)), register.isBetaUser(email))
 				};
 			}
 			else

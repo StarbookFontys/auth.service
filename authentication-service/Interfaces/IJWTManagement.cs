@@ -2,7 +2,7 @@
 {
 	public interface IJWTManagement
 	{
-		public string GenerateJWTToken(string email, string userlevel);
+		public string GenerateJWTToken(string email, string userlevel, Boolean betaUser);
 		public (string email, Boolean isAdmin) JWTDecoder(string jwtToken);
 	}
 }

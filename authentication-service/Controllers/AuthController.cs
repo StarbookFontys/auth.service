@@ -62,7 +62,6 @@ namespace authentication_service.Controllers
 				return Results.Problem("Error during JWT validation. Incorrect JWT formatting");
 			}
 		}
-
 		[HttpPost("/CreateAccount/{email}/{password}")]
 		public IResult Post(string email, string password)
 		{
@@ -71,16 +70,22 @@ namespace authentication_service.Controllers
 				accountManagement.SaveInformation(email, password);
 				return Results.Ok();
 			}
-			catch(PasswordIncorrectEx ex)
+			catch (PasswordIncorrectEx ex)
 			{
-				return Results.Problem(ex.Message);
+				return Results.Ok(ex.Message);
 			}
+			catch(EmailAlreadyExistsEx ex)
+			{
+				return Results.Conflict(ex.Message);
+			}
+
 		}
 
 		// POST api/<AuthController>
 		[HttpPost]
 		public void Post([FromBody] string value)
 		{
+
 		}
 
 		// PUT api/<AuthController>/5

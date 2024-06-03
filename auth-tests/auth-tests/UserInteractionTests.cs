@@ -6,6 +6,7 @@ using authentication_service.Controllers;
 using authentication_service.DAL;
 using authentication_service.Interfaces;
 using authentication_service.Models;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,7 @@ namespace auth_tests
 		private readonly IConnection con;
 		//private readonly string email;
 		private readonly Rabbitmqdummy rabbitmqdummy;
+		private readonly JWTManagement jwtmanagement;
 
 		public UserInteractionTests()
 		{
@@ -38,7 +40,8 @@ namespace auth_tests
 			Register = new Register(con);
 			Unregister = new Unregister(con);
 			rabbitmqdummy = new Rabbitmqdummy();
-			accountManagement = new AccountManagement(Unregister, Register, rabbitmqdummy);
+			jwtmanagement = new JWTManagement("no", "I refuse");
+			accountManagement = new AccountManagement(Unregister, Register, rabbitmqdummy, jwtmanagement);
 			//samplesalt = Convert.FromBase64String("i443zd2/bhb1+3BTfSInmQ==");
 
 			sampleuserinfo = new TestModels.UserInfo

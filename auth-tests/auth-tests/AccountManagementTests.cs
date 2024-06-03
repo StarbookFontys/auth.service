@@ -18,13 +18,15 @@ namespace auth_tests
 		//private readonly UserInfo sampleuserinfo;
 		//private readonly string samplepassword;
 		private readonly Rabbitmqdummy rabbitmqdummy;
+		private readonly JWTManagement jwtmanagement;
 
 		public AccountManagementTests() 
 		{
 			registerDummy = new RegisterDummy();
 			unregisterDummy = new Unregisterdummy();
 			rabbitmqdummy = new Rabbitmqdummy();
-			accountManagement = new AccountManagement(unregisterDummy, registerDummy, rabbitmqdummy);
+			jwtmanagement = new JWTManagement("no", "I refuse");
+			accountManagement = new AccountManagement(unregisterDummy, registerDummy, rabbitmqdummy, jwtmanagement);
 			samplesalt = Convert.FromBase64String("i443zd2/bhb1+3BTfSInmQ==");
 			//sampleuserinfo = new UserInfo
 			//{
