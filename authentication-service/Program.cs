@@ -93,12 +93,14 @@ app.UseCors(x => x
 		   .AllowAnyOrigin()
 		   .SetIsOriginAllowed(origin => true));
 
-if (app.Environment.IsProduction())
-{
-	app.Run();
-}
+//if (app.Environment.IsProduction())
+//{
+//	app.Run();
+//}
 
-if (app.Environment.IsDevelopment()) 
-{
-	app.Run();
-}
+//if (app.Environment.IsDevelopment()) 
+//{
+//	app.Run();
+//}
+
+app.Run(url);
