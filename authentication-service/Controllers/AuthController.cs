@@ -62,15 +62,6 @@ namespace authentication_service.Controllers
 				return Results.Problem("Error during JWT validation. Incorrect JWT formatting");
 			}
 		}
-
-		[HttpGet()]
-		public IResult Get()
-		{
-			var register = new Register(new Connection(ConnectionString));
-			int percentage = 20; 
-			return Results.Ok(register.BetaUsers(percentage));
-		}
-
 		[HttpPost("/CreateAccount/{email}/{password}")]
 		public IResult Post(string email, string password)
 		{

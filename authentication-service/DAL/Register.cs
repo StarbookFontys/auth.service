@@ -198,7 +198,7 @@ namespace authentication_service.DAL
 			return betaUser;
 		}
 
-		public string BetaUsers(double targetPercentage)
+		public string CreateBetaUsersBatch(double targetPercentage)
 		{
 			con.Open();
 

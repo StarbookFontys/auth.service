@@ -17,6 +17,7 @@ namespace authentication_service.Controllers
 		private readonly AccountManagement accountManagement;
 		private readonly RabbitMqManagement rabbitMqManagement;
 		private readonly JWTManagement JWTManager;
+		private readonly BetaUserManagement betaUserManagement;
 
 		public AdminController(IConfiguration configuration)
 		{
@@ -28,6 +29,24 @@ namespace authentication_service.Controllers
 			rabbitMqManagement = new RabbitMqManagement();
 			JWTManager = new JWTManagement(_configuration.GetValue<string>("ApplicationSettings:JWT_Secret"), _configuration["JWT:Issuer"]);
 			accountManagement = new AccountManagement(_unregister, _register, rabbitMqManagement, JWTManager);
+			betaUserManagement = new BetaUserManagement(_register, JWTManager);
+		}
+		[HttpPost("{targetPercentage}/{Token}")]
+		public IResult Post(double targetPercentage, string Token)
+		{
+			try
+			{
+				betaUserManagement.CreateBetaUsersBatch(Token, targetPercentage);
+				return Results.Ok();
+			}
+			catch (UnauthorizedAccessException ex)
+			{
+				return Results.Unauthorized();
+			}
+			catch (SecurityTokenValidationException ex)
+			{
+				return Results.Problem("Error during formatting processs. Token formatting is incorrect.");
+			}
 		}
 
 		[HttpDelete("{Email}/{Token}")]

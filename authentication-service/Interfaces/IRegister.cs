@@ -10,5 +10,6 @@
 		public Boolean IsAdmin(string email);
 		public void LogAccess(string email);
 		public Boolean isBetaUser(string email);
+		public string CreateBetaUsersBatch(double targetPercentage);
 	}
 }

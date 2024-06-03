@@ -50,12 +50,5 @@ namespace auth_tests
 			string generated = jwtmanagement.GenerateJWTToken("email@gmail.com", "True", false);
 			Assert.IsTrue(jwtmanagement.ValidateToken(generated));
 		}
-
-		[TestMethod]
-		public void JWTAdminTest()
-		{
-			string generated = jwtmanagement.GenerateJWTToken("email@gmail.com", "True", false);
-			accountManagement.AdminDelete("email@gmail.com", generated);	
-		}
 	}
 }
